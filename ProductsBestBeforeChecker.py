@@ -5,20 +5,23 @@ import re
 import sys
 
 def convert_product_date_to_real_date(product_date):
-    match = re.search('(\d*)[\.\/\-](\d*)[\.\/\-](\d*)', product_date)
+    match = re.search('(\d*)[\.\/\-\ ](\d*)[\.\/\-\ ](\d*)', product_date)
     if match:
         if int(match.group(3)) < 2000:
             return True, datetime.date(2000 + int(match.group(3)), int(match.group(2)), int(match.group(1)))
         else:
             return True, datetime.date(int(match.group(3)), int(match.group(2)), int(match.group(1)))
-    match = re.search('(\d*)[\-](\d*)', product_date)
+    match = re.search('(\d*)[\.\/\-\ ](\d*)', product_date)
     if match:
-        return True, datetime.date(int(match.group(2)), int(match.group(1)), 15)
+        if int(match.group(2)) < 2000:
+            return True, datetime.date(2000 + int(match.group(2)), int(match.group(1)), 15)
+        else:
+            return True, datetime.date(int(match.group(2)), int(match.group(1)), 15)
     return False, product_date
 
 today = datetime.date.today()
 
-version = "v0.4"
+version = "v0.5"
 
 if len(sys.argv) == 2:
     if sys.argv[1] == "--version":
