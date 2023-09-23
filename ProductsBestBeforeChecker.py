@@ -17,15 +17,22 @@ def convert_product_date_to_real_date(product_date):
     return False, product_date
 
 today = datetime.date.today()
-print("v0.3\n\nToday", today, "\n")
+
+version = "v0.4"
 
 if len(sys.argv) == 2:
-    csv_lines = open(sys.argv[1], 'r').read().split('\n')
-    for line in csv_lines:
-        match = re.search('(.*); (.*); (.*)', line)
-        if match:
-            success, product_date = convert_product_date_to_real_date(match.group(3))
-            if success:
-                valid = product_date - today > datetime.timedelta(days=30)
-                if not valid:
-                    print(match.group(1), product_date)
+    if sys.argv[1] == "--version":
+        print(version)
+    else:
+        print(version + "\n")
+        #print("Today", today, "\n\n")
+
+        csv_lines = open(sys.argv[1], 'r').read().split('\n')
+        for line in csv_lines:
+            match = re.search('(.*); (.*); (.*)', line)
+            if match:
+                success, product_date = convert_product_date_to_real_date(match.group(3))
+                if success:
+                    valid = product_date - today > datetime.timedelta(days=30)
+                    if not valid:
+                        print(match.group(1), product_date)
