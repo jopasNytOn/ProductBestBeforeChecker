@@ -1,3 +1,4 @@
+import datetime
 import os
 import subprocess
 import unittest
@@ -9,6 +10,17 @@ class TestProductsBestBeforeChecker(unittest.TestCase):
 
     def setUp(self):
         self.version = call_command("python ProductsBestBeforeChecker.py --version")
+
+    def helper_RemoveFile(self, days):
+        os.remove("test/date_in_{}_days.csv".format(days))
+
+    def helper_SetExpiryDate(self, days):
+        self.date = datetime.date.today()
+        expiry_date = self.date + datetime.timedelta(days=days)
+        file = open("test/date_in_{}_days.csv".format(days), "w+")
+        file.write("abc; ; {}\r\ndef; ; {}\r\n".format(expiry_date.strftime("%d-%m-%Y"), expiry_date.strftime("%d-%m-%Y")))
+        file.close()
+        return expiry_date.strftime("%Y-%m-%d")
 
     def test_ValidDateWithDashes(self):
         value = call_command("python ProductsBestBeforeChecker.py test/valid_with_dashes.csv")
@@ -57,6 +69,21 @@ class TestProductsBestBeforeChecker(unittest.TestCase):
     def test_InvalidDateShortenedYear(self):
         value = call_command("python ProductsBestBeforeChecker.py test/invalid_with_shortened_year.csv")
         self.assertEqual(self.version + "\r\n\r\nabc 2001-11-22\r\ndef 2001-06-15", value)
+
+    def test_DateIn31Days(self):
+        days = 31
+        expiry_date = self.helper_SetExpiryDate(days)
+        value = call_command("python ProductsBestBeforeChecker.py test/date_in_{}_days.csv".format(days))
+        self.assertEqual(self.version, value)
+        self.helper_RemoveFile(days)
+
+    def test_DateIn30Days(self):
+        days = 30
+        expiry_date = self.helper_SetExpiryDate(days)
+        value = call_command("python ProductsBestBeforeChecker.py test/date_in_{}_days.csv".format(days))
+        self.assertEqual(self.version + "\r\n\r\nabc {}\r\ndef {}".format(expiry_date, expiry_date), value)
+        self.helper_RemoveFile(days)
+
 
 if __name__ == '__main__':
     unittest.main()
